@@ -1,4 +1,12 @@
-# 1.7.5 (future)
+# 1.7.6 (future)
+- MIDI: Add a Linux ALSA driver for MIDI.
+- LOCALIZATION: Update Italian translation.
+- LOCALIZATION: Update Japanese translation.
+- SCANNER: Fix GDI disc scanning.
+- SWITCH/LIBNX: Improve touch scaling calculation.
+- SWITCH: Proper button labels.
+
+# 1.7.5
 - CAMERA: Fix Video4Linux2 driver that broke years ago.
 - CONFIG: Add 'Reset To Defaults' setting in Configurations. Thi will reset your config file to defaults.
 - CHEATS: Add support for Rumble when increase or decrease by the rumble value.

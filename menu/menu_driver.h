@@ -233,6 +233,13 @@ enum menu_settings_type
    MENU_SETTINGS_SUBSYSTEM_ADD,
    MENU_SETTINGS_SUBSYSTEM_LAST = MENU_SETTINGS_SUBSYSTEM_ADD + RARCH_MAX_SUBSYSTEMS,
    MENU_SETTINGS_CHEAT_MATCH,
+
+#ifdef HAVE_LAKKA_SWITCH
+   MENU_SET_SWITCH_GPU_PROFILE,
+   MENU_SET_SWITCH_BRIGHTNESS,
+   MENU_SET_SWITCH_CPU_PROFILE,
+#endif
+
    MENU_SETTINGS_LAST
 };
 
@@ -816,6 +823,8 @@ void menu_display_reset_textures_list(
 /* Returns the OSK key at a given position */
 int menu_display_osk_ptr_at_pos(void *data, int x, int y,
       unsigned width, unsigned height);
+
+bool menu_display_driver_exists(const char *s);
 
 void menu_driver_destroy(void);
 

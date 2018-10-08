@@ -1086,8 +1086,8 @@ static void xmb_update_savestate_thumbnail_path(void *data, unsigned i)
                || (string_is_equal(entry.label, "loadstate"))
                || (string_is_equal(entry.label, "savestate"))))
       {
-         size_t path_size         = 8024 * sizeof(char);
-         char             *path   = (char*)malloc(8204 * sizeof(char));
+         size_t path_size         = 8204 * sizeof(char);
+         char             *path   = (char*)malloc(path_size);
          global_t         *global = global_get_ptr();
 
          path[0] = '\0';
@@ -2391,6 +2391,10 @@ static uintptr_t xmb_icon_get_id(xmb_handle_t *xmb,
                   case MENU_ENUM_LABEL_SHOW_WIMP:
                   case MENU_ENUM_LABEL_USER_INTERFACE_SETTINGS:
                      return xmb->textures.list[XMB_TEXTURE_UI];
+#ifdef HAVE_LAKKA_SWITCH
+                  case MENU_ENUM_LABEL_SWITCH_GPU_PROFILE:
+                  case MENU_ENUM_LABEL_SWITCH_CPU_PROFILE:
+#endif
                   case MENU_ENUM_LABEL_POWER_MANAGEMENT_SETTINGS:
                      return xmb->textures.list[XMB_TEXTURE_POWER];
                   case MENU_ENUM_LABEL_RETRO_ACHIEVEMENTS_SETTINGS:
@@ -2520,6 +2524,9 @@ static uintptr_t xmb_icon_get_id(xmb_handle_t *xmb,
             return xmb->textures.list[XMB_TEXTURE_SUBSETTING];
          return xmb->textures.list[XMB_TEXTURE_SETTING];
       case MENU_SETTING_GROUP:
+#ifdef HAVE_LAKKA_SWITCH
+      case MENU_SET_SWITCH_BRIGHTNESS:
+#endif
          return xmb->textures.list[XMB_TEXTURE_SETTING];
       case MENU_INFO_MESSAGE:
          return xmb->textures.list[XMB_TEXTURE_CORE_INFO];
@@ -3629,7 +3636,7 @@ static void xmb_frame(void *data, video_frame_info_t *video_info)
 
       datetime.s         = timedate;
       datetime.len       = sizeof(timedate);
-      datetime.time_mode = 4;
+      datetime.time_mode = settings->uints.menu_timedate_style;
 
       menu_display_timedate(&datetime);
 
@@ -5327,6 +5334,17 @@ static int xmb_list_push(void *data, void *userdata,
                menu_displaylist_ctl(DISPLAYLIST_SETTING_ENUM, &entry);
             }
 
+#ifdef HAVE_LAKKA_SWITCH
+            entry.enum_idx      = MENU_ENUM_LABEL_SWITCH_CPU_PROFILE;
+            menu_displaylist_ctl(DISPLAYLIST_SETTING_ENUM, &entry);
+
+            entry.enum_idx      = MENU_ENUM_LABEL_SWITCH_GPU_PROFILE;
+            menu_displaylist_ctl(DISPLAYLIST_SETTING_ENUM, &entry);
+
+            entry.enum_idx      = MENU_ENUM_LABEL_SWITCH_BACKLIGHT_CONTROL;
+            menu_displaylist_ctl(DISPLAYLIST_SETTING_ENUM, &entry);
+#endif
+
 #ifndef HAVE_DYNAMIC
             entry.enum_idx      = MENU_ENUM_LABEL_RESTART_RETROARCH;
             menu_displaylist_ctl(DISPLAYLIST_SETTING_ENUM, &entry);
@@ -5343,6 +5361,7 @@ static int xmb_list_push(void *data, void *userdata,
                entry.enum_idx      = MENU_ENUM_LABEL_HELP_LIST;
                menu_displaylist_ctl(DISPLAYLIST_SETTING_ENUM, &entry);
             }
+
 #if !defined(IOS)
             if (settings->bools.menu_show_quit_retroarch)
             {

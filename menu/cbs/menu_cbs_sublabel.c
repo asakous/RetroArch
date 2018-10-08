@@ -296,6 +296,7 @@ default_sublabel_macro(action_bind_sublabel_pointer_enable,                MENU_
 default_sublabel_macro(action_bind_sublabel_thumbnails,                    MENU_ENUM_SUBLABEL_THUMBNAILS)
 default_sublabel_macro(action_bind_sublabel_left_thumbnails,               MENU_ENUM_SUBLABEL_LEFT_THUMBNAILS)
 default_sublabel_macro(action_bind_sublabel_timedate_enable,               MENU_ENUM_SUBLABEL_TIMEDATE_ENABLE)
+default_sublabel_macro(action_bind_sublabel_timedate_style,                MENU_ENUM_SUBLABEL_TIMEDATE_STYLE)
 default_sublabel_macro(action_bind_sublabel_battery_level_enable,          MENU_ENUM_SUBLABEL_BATTERY_LEVEL_ENABLE)
 default_sublabel_macro(action_bind_sublabel_navigation_wraparound,         MENU_ENUM_SUBLABEL_NAVIGATION_WRAPAROUND)
 default_sublabel_macro(action_bind_sublabel_audio_resampler_quality,       MENU_ENUM_SUBLABEL_AUDIO_RESAMPLER_QUALITY)
@@ -478,6 +479,12 @@ default_sublabel_macro(action_bind_sublabel_show_wimp,                          
 #endif
 default_sublabel_macro(action_bind_sublabel_discord_allow,                         MENU_ENUM_SUBLABEL_DISCORD_ALLOW)
 
+#ifdef HAVE_LAKKA_SWITCH
+default_sublabel_macro(action_bind_sublabel_switch_gpu_profile,             MENU_ENUM_SUBLABEL_SWITCH_GPU_PROFILE)
+default_sublabel_macro(action_bind_sublabel_switch_cpu_profile,             MENU_ENUM_SUBLABEL_SWITCH_CPU_PROFILE)
+default_sublabel_macro(action_bind_sublabel_switch_backlight_control,       MENU_ENUM_SUBLABEL_SWITCH_BACKLIGHT_CONTROL)
+#endif
+
 static int action_bind_sublabel_cheevos_entry(
       file_list_t *list,
       unsigned type, unsigned i,
@@ -528,7 +535,8 @@ static int action_bind_sublabel_remap_kbd_sublabel(
       input_config_get_device_display_name(user_idx) ?
       input_config_get_device_display_name(user_idx) :
       (input_config_get_device_name(user_idx) ?
-      input_config_get_device_name(user_idx) : "N/A"));
+      input_config_get_device_name(user_idx) : 
+      msg_hash_to_str(MENU_ENUM_LABEL_VALUE_NOT_AVAILABLE)));
    return 0;
 }
 
@@ -548,7 +556,9 @@ static int action_bind_sublabel_audio_mixer_stream(
    switch (stream->state)
    {
       case AUDIO_STREAM_STATE_NONE:
-         strlcpy(msg, "N/A", sizeof(msg));
+         strlcpy(msg,
+               msg_hash_to_str(MENU_ENUM_LABEL_VALUE_NOT_AVAILABLE),
+               sizeof(msg));
          break;
       case AUDIO_STREAM_STATE_STOPPED:
          strlcpy(msg, "Stopped", sizeof(msg));
@@ -564,7 +574,8 @@ static int action_bind_sublabel_audio_mixer_stream(
          break;
    }
 
-   snprintf(s, len, "State : %s | Volume: %.2f dB", msg,
+   snprintf(s, len, "State : %s | %s: %.2f dB", msg,
+         msg_hash_to_str(MENU_ENUM_LABEL_VALUE_MIXER_ACTION_VOLUME),
          stream->volume);
    return 0;
 }
@@ -582,7 +593,8 @@ static int action_bind_sublabel_remap_sublabel(
       input_config_get_device_display_name(offset) ?
       input_config_get_device_display_name(offset) :
       (input_config_get_device_name(offset) ?
-      input_config_get_device_name(offset) : "N/A"));
+      input_config_get_device_name(offset) : 
+      msg_hash_to_str(MENU_ENUM_LABEL_VALUE_NOT_AVAILABLE)));
    return 0;
 }
 
@@ -618,6 +630,7 @@ static int action_bind_sublabel_netplay_room(
    const char *gamename   = NULL;
    const char *core_ver   = NULL;
    const char *frontend   = NULL;
+   const char *na         = NULL;
 
    /* This offset may cause issues if any entries are added to this menu */
    unsigned offset        = i - 3;
@@ -631,13 +644,14 @@ static int action_bind_sublabel_netplay_room(
    core_ver   = netplay_room_list[offset].coreversion;
    gamecrc    = netplay_room_list[offset].gamecrc;
    frontend   = netplay_room_list[offset].frontend;
+   na         = msg_hash_to_str(MENU_ENUM_LABEL_VALUE_NOT_AVAILABLE);
 
    snprintf(s, len,
 	   "RetroArch: %s (%s)\nCore: %s (%s)\nGame: %s (%08x)",
-      string_is_empty(ra_version) ? "n/a" : ra_version,
-      string_is_empty(frontend) ? "n/a" : frontend,
+      string_is_empty(ra_version)    ? na : ra_version,
+      string_is_empty(frontend)      ? na : frontend,
       corename, core_ver,
-      !string_is_equal(gamename, "N/A") ? gamename : "n/a",
+      !string_is_equal(gamename, na) ? gamename : na,
       gamecrc);
 #if 0
    strlcpy(s, corename, len);
@@ -1276,6 +1290,9 @@ int menu_cbs_init_bind_sublabel(menu_file_list_cbs_t *cbs,
             break;
          case MENU_ENUM_LABEL_TIMEDATE_ENABLE:
             BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_timedate_enable);
+            break;
+         case MENU_ENUM_LABEL_TIMEDATE_STYLE:
+            BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_timedate_style);
             break;
          case MENU_ENUM_LABEL_THUMBNAILS:
             BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_thumbnails);
@@ -1992,6 +2009,17 @@ int menu_cbs_init_bind_sublabel(menu_file_list_cbs_t *cbs,
 #ifdef HAVE_QT
          case MENU_ENUM_LABEL_SHOW_WIMP:
             BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_show_wimp);
+            break;
+#endif
+#ifdef HAVE_LAKKA_SWITCH
+         case MENU_ENUM_LABEL_SWITCH_CPU_PROFILE:
+            BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_switch_cpu_profile);
+            break;
+         case MENU_ENUM_LABEL_SWITCH_GPU_PROFILE:
+            BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_switch_gpu_profile);
+            break;
+         case MENU_ENUM_LABEL_SWITCH_BACKLIGHT_CONTROL:
+            BIND_ACTION_SUBLABEL(cbs, action_bind_sublabel_switch_backlight_control);
             break;
 #endif
          case MENU_ENUM_LABEL_CHEAT_APPLY_AFTER_LOAD:

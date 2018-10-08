@@ -544,6 +544,7 @@ endif
 
 ifeq ($(HAVE_ALSA), 1)
    OBJ += audio/drivers/alsa.o
+   OBJ += midi/drivers/alsa_midi.o
 
 ifeq ($(HAVE_THREADS), 1)
    OBJ += audio/drivers/alsathread.o
@@ -718,6 +719,10 @@ endif
 
 ifeq ($(HAVE_LAKKA), 1)
    DEFINES += -DHAVE_LAKKA
+endif
+
+ifeq ($(HAVE_LAKKA_SWITCH), 1)
+   DEFINES += -DHAVE_LAKKA_SWITCH
 endif
 
 ifeq ($(HAVE_MENU_COMMON), 1)
